@@ -1,17 +1,21 @@
+const { hash } = require('bcryptjs');
+
 const usersController = require('../controllers/usersController');
 
-async function execute({ name, email, password }) {
-  const userExists = await usersController.findByEmail(email);
+module.exports.execute = async ({ name, email, password }) => {
+  const checkUserExists = await usersController.findByEmail(email);
 
-  if (userExists) {
-    throw new Error('User email is already in use');
+  if (checkUserExists) {
+    throw new Error('The email address has already used');
   }
 
-  const user = await usersController.create({ name, email, password });
+  const hashedPassword = await hash(password, 8);
+
+  const user = await usersController.create({
+    name,
+    email,
+    password: hashedPassword,
+  });
 
   return user;
-}
-
-module.exports = {
-  execute,
 };
